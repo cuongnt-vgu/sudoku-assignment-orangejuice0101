@@ -67,7 +67,7 @@ void print_solution(SudokuBoard *p_board)
     }
 }
 
-void set_candidate(Cell *cell, int value)
+void set_candidate(Cell *cell, int value) // cell: candidates[9] -> [0, 0, 0, ..., 0], 3,5,7
 {
     cell->candidates[value - 1] = 1;
     cell->num_candidates += 1;
