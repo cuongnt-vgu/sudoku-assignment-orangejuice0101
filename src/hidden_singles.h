@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sudoku.h"
+#include "utils.c"
 
 typedef struct HiddenSingle_impl
 {
