@@ -1,6 +1,12 @@
 #pragma once
 
 #include <stdbool.h>
+#include "utils.c"
+#include "hidden_singles.c"
+#include "hidden_pairs.c"
+#include "hidden_triples.c"
+#include "naked_pairs.c"
+#include "naked_triples.c"
 
 #define BOARD_SIZE 9
 

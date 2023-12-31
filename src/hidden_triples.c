@@ -1,63 +1,65 @@
 #include "hidden_triples.h"
 
 
-int hidden_triples(SudokuBoard *p_board)
-{
-    for (int unit_type = 0; unit_type < 3; unit_type++) {
-        Cell **p_units[BOARD_SIZE];  // Pointers to rows, columns, or boxes
-        if (unit_type == 0) {
-            p_units = p_board->p_rows;
-        } else if (unit_type == 1) {
-            p_units = p_board->p_cols;
-        } else {
-            p_units = p_board->p_boxes;
+int hidden_triples(SudokuBoard *p_board) {
+    int counter = 0;
+
+    // Check for hidden triples in rows, columns, and boxes
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        counter += find_hidden_triples(p_board->p_rows[i]);
+        counter += find_hidden_triples(p_board->p_cols[i]);
+        counter += find_hidden_triples(p_board->p_boxes[i]);
+    }
+
+    return counter;
+}
+
+int find_hidden_triples(Cell **p_cells) {
+    int counter = 0;
+    int candidate_counts[BOARD_SIZE] = {0};
+    int triple_candidates[3] = {0};
+
+    // Count occurrences of candidates in the cells
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            if (is_candidate(p_cells[i], j + 1)) {
+                candidate_counts[j]++;
+            }
         }
+    }
 
-        for (int unit_index = 0; unit_index < BOARD_SIZE; unit_index++) {
-            int candidate_triples[BOARD_SIZE * BOARD_SIZE][3] = {0};
-            int triple_count = 0;
+    // Find three candidates that appear exactly three times
+    int triple_count = 0;
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        if (candidate_counts[i] == 3) {
+            triple_candidates[triple_count] = i + 1;
+            triple_count++;
+            if (triple_count == 3) {
+                break;
+            }
+        }
+    }
 
-            for (int cell_index = 0; cell_index < BOARD_SIZE; cell_index++) {
-                Cell *cell = p_units[unit_index][cell_index];
-                if (cell->num_candidates == 3) {
-                    bool found_triple = false;
-                    for (int i = 0; i < triple_count; i++) {
-                        if (is_subset(cell->candidates, 3, candidate_triples[i], 3)) {
-                            found_triple = true;
-                            break;
-                        }
-                    }
-                    if (!found_triple) {
-                        memcpy(candidate_triples[triple_count], cell->candidates, 3 * sizeof(int));
-                        triple_count++;
-                    }
+    // If a hidden triple is found, remove other candidates from cells containing the triple
+    if (triple_count == 3) {
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            bool contains_triple = true;
+            for (int j = 0; j < 3; j++) {
+                if (!is_candidate(p_cells[i], triple_candidates[j])) {
+                    contains_triple = false;
+                    break;
                 }
             }
-
-            for (int i = 0; i < triple_count; i++) {
-                int triple[3] = {candidate_triples[i][0], candidate_triples[i][1], candidate_triples[i][2]};
-                // Check if the triple is hidden within the unit
-                bool hidden = true;
+            if (contains_triple) {
                 for (int j = 0; j < BOARD_SIZE; j++) {
-                    Cell *cell = p_units[unit_index][j];
-                    if (cell->num_candidates > 3 &&
-                        has_common_elements(cell->candidates, cell->num_candidates, triple, 3)) {
-                        hidden = false;
-                        break;
-                    }
-                }
-                if (hidden) {
-                    // Hidden triple found, eliminate other candidates from cells in the unit
-                    for (int j = 0; j < BOARD_SIZE; j++) {
-                        Cell *cell = p_units[unit_index][j];
-                        if (cell->num_candidates > 3) {
-                            for (int k = 0; k < 3; k++) {
-                                unset_candidate(cell, triple[k]);
-                            }
-                        }
+                    if (!is_candidate(p_cells[i], triple_candidates[j])) {
+                        unset_candidate(p_cells[i], j + 1);
+                        counter++;
                     }
                 }
             }
         }
     }
+
+    return counter;
 }

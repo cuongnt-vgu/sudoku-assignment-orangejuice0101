@@ -1,66 +1,59 @@
 #include "hidden_pairs.h"
 
 
-int hidden_pairs(SudokuBoard *p_board)
-{
-    for (int unit_type = 0; unit_type < 3; unit_type++) {
-        Cell **p_units[BOARD_SIZE];  // Pointers to rows, columns, or boxes
-        if (unit_type == 0) {
-            p_units = p_board->p_rows;
-        } else if (unit_type == 1) {
-            p_units = p_board->p_cols;
-        } else {
-            p_units = p_board->p_boxes;
-        }
+int hidden_pairs(SudokuBoard *p_board) {
+    int counter = 0;
 
-        for (int unit_index = 0; unit_index < BOARD_SIZE; unit_index++) {
-            int candidate_pairs[BOARD_SIZE * BOARD_SIZE][2] = {0};
-            int pair_count = 0;
+    // Check for hidden pairs in rows, columns, and boxes
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        counter += find_hidden_pairs(p_board->p_rows[i]);
+        counter += find_hidden_pairs(p_board->p_cols[i]);
+        counter += find_hidden_pairs(p_board->p_boxes[i]);
+    }
 
-            for (int cell_index = 0; cell_index < BOARD_SIZE; cell_index++) {
-                Cell *cell = p_units[unit_index][cell_index];
-                if (cell->num_candidates == 2) {
-                    bool found_pair = false;
-                    for (int i = 0; i < pair_count; i++) {
-                        if (cell->candidates[0] == candidate_pairs[i][0] &&
-                            cell->candidates[1] == candidate_pairs[i][1] ||
-                            cell->candidates[0] == candidate_pairs[i][1] &&
-                            cell->candidates[1] == candidate_pairs[i][0]) {
-                            found_pair = true;
-                            break;
-                        }
-                    }
-                    if (!found_pair) {
-                        candidate_pairs[pair_count][0] = cell->candidates[0];
-                        candidate_pairs[pair_count][1] = cell->candidates[1];
-                        pair_count++;
-                    }
-                }
+    return counter;
+}
+
+int find_hidden_pairs(Cell **p_cells) {
+    int counter = 0;
+    int candidate_counts[BOARD_SIZE] = {0};
+    int pair_candidates[2][BOARD_SIZE] = {0};
+
+    // Count occurrences of candidates in the cells
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        for (int j = 0; j < BOARD_SIZE; j++) {
+            if (is_candidate(p_cells[i], j + 1)) {
+                candidate_counts[j]++;
             }
+        }
+    }
 
-            for (int i = 0; i < pair_count; i++) {
-                int pair[2] = {candidate_pairs[i][0], candidate_pairs[i][1]};
-                // Check if the pair is hidden within the unit
-                bool hidden = true;
+    // Find two candidates that appear exactly twice
+    int pair_count = 0;
+    for (int i = 0; i < BOARD_SIZE; i++) {
+        if (candidate_counts[i] == 2) {
+            pair_candidates[pair_count][pair_count] = i + 1;
+            pair_count++;
+            if (pair_count == 2) {
+                break;
+            }
+        }
+    }
+
+    // If a hidden pair is found, remove other candidates from cells containing the pair
+    if (pair_count == 2) {
+        for (int i = 0; i < BOARD_SIZE; i++) {
+            if (is_candidate(p_cells[i], pair_candidates[0][0]) &&
+                is_candidate(p_cells[i], pair_candidates[1][0])) {
                 for (int j = 0; j < BOARD_SIZE; j++) {
-                    Cell *cell = p_units[unit_index][j];
-                    if (cell->num_candidates > 2 &&
-                        (is_candidate(cell, pair[0]) || is_candidate(cell, pair[1]))) {
-                        hidden = false;
-                        break;
-                    }
-                }
-                if (hidden) {
-                    // Hidden pair found, eliminate other candidates from cells in the unit
-                    for (int j = 0; j < BOARD_SIZE; j++) {
-                        Cell *cell = p_units[unit_index][j];
-                        if (cell->num_candidates > 2) {
-                            unset_candidate(cell, pair[0]);
-                            unset_candidate(cell, pair[1]);
-                        }
+                    if (j + 1 != pair_candidates[0][0] && j + 1 != pair_candidates[1][0]) {
+                        unset_candidate(p_cells[i], j + 1);
+                        counter++;
                     }
                 }
             }
         }
     }
+
+    return counter;
 }
