@@ -1,4 +1,5 @@
 #include "hidden_pairs.h"
+#include "cell.h"
 
 
 int hidden_pairs(SudokuBoard *p_board) {

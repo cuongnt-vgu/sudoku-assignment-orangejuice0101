@@ -1,4 +1,5 @@
 #include "hidden_triples.h"
+#include "cell.h"
 
 
 int hidden_triples(SudokuBoard *p_board) {

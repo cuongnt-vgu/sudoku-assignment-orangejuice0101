@@ -2,6 +2,7 @@
 
 #include "naked_triples.h"
 #include "sudoku.c"
+#include "cell.h"
 
 int naked_triples(SudokuBoard *p_board) {
     int counter = 0;

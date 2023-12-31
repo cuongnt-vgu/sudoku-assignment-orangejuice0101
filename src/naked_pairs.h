@@ -1,6 +1,7 @@
 #pragma once
 
 #include "sudoku.h"
+#include "cell.h"
 
 int naked_pairs(SudokuBoard *p_board);
 int find_naked_pairs(Cell **p_cells);

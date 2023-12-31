@@ -2,7 +2,7 @@
 
 #include "sudoku.h"
 #include "utils.c"
-
+#include "cell.h"
 typedef struct HiddenSingle_impl
 {
     Cell *p_cell;

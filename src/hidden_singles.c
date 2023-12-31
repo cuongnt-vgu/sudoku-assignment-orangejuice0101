@@ -1,4 +1,5 @@
 #include "hidden_singles.h"
+#include "cell.h"
 
 
 int hidden_singles(SudokuBoard *p_board)

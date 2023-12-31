@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include "cell.h"
 #include "utils.c"
 #include "hidden_singles.c"
 #include "hidden_pairs.c"

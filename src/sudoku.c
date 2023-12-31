@@ -1,4 +1,5 @@
 #include "sudoku.h"
+#include "cell.h"
 
 #include <assert.h>
 #include <stdio.h>

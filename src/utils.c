@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "sudoku.h"
+#include "cell.h"
 
 void init_sudoku(SudokuBoard *p_board)
 {
